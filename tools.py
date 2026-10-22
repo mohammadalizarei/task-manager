@@ -44,6 +44,61 @@ get_future_date_schema = {
     "strict": True
 }
 
+def get_items(date: Optional[str] = None, item_type: Optional[str] = None) -> str:
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    if date:
+        day_entry = next((item for item in data if item["date"] == date), None)
+        if not day_entry:
+            if item_type:
+                return json.dumps([], ensure_ascii=False)
+            return json.dumps({"date": date, "tasks": [], "events": [], "meetings": []}, ensure_ascii=False)
+
+        if item_type in ["tasks", "events", "meetings"]:
+            return json.dumps(day_entry.get(item_type, []), ensure_ascii=False)
+
+        return json.dumps(day_entry, ensure_ascii=False)
+
+    if item_type in ["tasks", "events", "meetings"]:
+        filtered_data = [
+            {"date": item["date"], item_type: item.get(item_type, [])}
+            for item in data
+            if item.get(item_type)
+        ]
+        return json.dumps(filtered_data, ensure_ascii=False)
+
+    return json.dumps(data, ensure_ascii=False)
+
+get_items_schema = {
+    "type": "function",
+    "name": "get_items",
+    "description": "Retrieves tasks, events, or meetings. Filters by date and item_type if provided, or returns all records if null.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "date": {
+                "type": ["string", "null"],
+                "description": "The target date in YYYY-MM-DD format. Use null to retrieve items across all dates."
+            },
+            "item_type": {
+                "type": ["string", "null"],
+                "enum": ["tasks", "events", "meetings", None],
+                "description": "The category of items to retrieve. Use null to retrieve all categories."
+            }
+        },
+        "required": ["date", "item_type"],
+        "additionalProperties": False
+    },
+    "strict": True
+}
+
 def add_task(date: str, title: str, priority: Optional[str] = None) -> str:
     if not priority:
         priority = "medium"
@@ -108,3 +163,4 @@ add_task_schema = {
     },
     "strict": True
 }
+
