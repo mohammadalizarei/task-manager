@@ -1,7 +1,7 @@
 import json
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 DB_FILE = "database.json"
@@ -17,6 +17,28 @@ get_today_date_schema = {
         "type": "object",
         "properties": {},
         "required": [],
+        "additionalProperties": False
+    },
+    "strict": True
+}
+
+def get_future_date(days: int) -> str:
+    target_date = datetime.now() + timedelta(days=days)
+    return target_date.strftime("%Y-%m-%d")
+
+get_future_date_schema = {
+    "type": "function",
+    "name": "get_future_date",
+    "description": "Calculates and returns the date after a given number of days from today in YYYY-MM-DD format.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "days": {
+                "type": "integer",
+                "description": "The number of days to add to the current date."
+            }
+        },
+        "required": ["days"],
         "additionalProperties": False
     },
     "strict": True
