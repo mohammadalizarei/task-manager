@@ -164,3 +164,122 @@ add_task_schema = {
     "strict": True
 }
 
+def add_event(date: str, title: str, time: str) -> str:
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    day_entry = next((item for item in data if item["date"] == date), None)
+    if not day_entry:
+        day_entry = {
+            "date": date,
+            "tasks": [],
+            "events": [],
+            "meetings": []
+        }
+        data.append(day_entry)
+
+    new_event = {
+        "id": str(uuid.uuid4())[:8],
+        "title": title,
+        "time": time,
+        "status": "pending"
+    }
+
+    day_entry["events"].append(new_event)
+
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return json.dumps(new_event, ensure_ascii=False)
+
+add_event_schema = {
+    "type": "function",
+    "name": "add_event",
+    "description": "Adds a new event for a specific date and time with status set to pending.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "date": {
+                "type": "string",
+                "description": "The date for the event in YYYY-MM-DD format."
+            },
+            "title": {
+                "type": "string",
+                "description": "The title of the event."
+            },
+            "time": {
+                "type": "string",
+                "description": "The time of the event in HH:MM format."
+            }
+        },
+        "required": ["date", "title", "time"],
+        "additionalProperties": False
+    },
+    "strict": True
+}
+
+def add_meeting(date: str, title: str, time: str) -> str:
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
+
+    day_entry = next((item for item in data if item["date"] == date), None)
+    if not day_entry:
+        day_entry = {
+            "date": date,
+            "tasks": [],
+            "events": [],
+            "meetings": []
+        }
+        data.append(day_entry)
+
+    new_meeting = {
+        "id": str(uuid.uuid4())[:8],
+        "title": title,
+        "time": time,
+        "status": "pending"
+    }
+
+    day_entry["meetings"].append(new_meeting)
+
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return json.dumps(new_meeting, ensure_ascii=False)
+
+add_meeting_schema = {
+    "type": "function",
+    "name": "add_meeting",
+    "description": "Adds a new meeting for a specific date and time with status set to pending.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "date": {
+                "type": "string",
+                "description": "The date for the meeting in YYYY-MM-DD format."
+            },
+            "title": {
+                "type": "string",
+                "description": "The title or description of the meeting."
+            },
+            "time": {
+                "type": "string",
+                "description": "The time of the meeting in HH:MM format."
+            }
+        },
+        "required": ["date", "title", "time"],
+        "additionalProperties": False
+    },
+    "strict": True
+}
