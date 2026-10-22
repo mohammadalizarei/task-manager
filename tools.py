@@ -283,3 +283,43 @@ add_meeting_schema = {
     },
     "strict": True
 }
+
+def delete_item(item_id: str) -> str:
+    if not os.path.exists(DB_FILE):
+        return json.dumps({"success": False, "error": "Database not found."})
+
+    with open(DB_FILE, "r", encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            return json.dumps({"success": False, "error": "Invalid database format."})
+
+    for day_entry in data:
+        for category in ["tasks", "events", "meetings"]:
+            items = day_entry.get(category, [])
+            for i, item in enumerate(items):
+                if item.get("id") == item_id:
+                    deleted_item = items.pop(i)
+                    with open(DB_FILE, "w", encoding="utf-8") as f:
+                        json.dump(data, f, indent=2, ensure_ascii=False)
+                    return json.dumps({"success": True, "deleted_item": deleted_item}, ensure_ascii=False)
+
+    return json.dumps({"success": False, "error": "Item not found."})
+
+delete_item_schema = {
+    "type": "function",
+    "name": "delete_item",
+    "description": "Deletes a task, event, or meeting by its unique ID.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "item_id": {
+                "type": "string",
+                "description": "The unique ID of the item to delete."
+            }
+        },
+        "required": ["item_id"],
+        "additionalProperties": False
+    },
+    "strict": True
+}
