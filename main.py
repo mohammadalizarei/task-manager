@@ -12,7 +12,7 @@ client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
 )
 
-MODEL = "gpt-6.1-sol"
+MODEL = "claude-opus-4-6"
 
 SYSTEM_PROMPT = """
 You are a task management assistant.
