@@ -375,3 +375,33 @@ update_item_schema = {
     },
     "strict": True
 }
+
+tools = [
+    get_today_date_schema,
+    get_future_date_schema,
+    add_task_schema,
+    add_event_schema,
+    add_meeting_schema,
+    get_items_schema,
+    delete_item_schema,
+    update_item_schema
+]
+
+available_functions = {
+    "get_today_date": get_today_date,
+    "get_future_date": get_future_date,
+    "add_task": add_task,
+    "add_event": add_event,
+    "add_meeting": add_meeting,
+    "get_items": get_items,
+    "delete_item": delete_item,
+    "update_item": update_item
+}
+
+def execute_tool(name: str, arguments: str) -> str:
+    func = available_functions.get(name)
+    if not func:
+        return json.dumps({"error": f"Tool {name} not found."})
+    
+    args = json.loads(arguments) if arguments else {}
+    return func(**args)
