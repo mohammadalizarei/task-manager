@@ -83,7 +83,7 @@ def run_agent(user_message):
 
 
 if __name__ == "__main__":
-    print("Task Manager Agent (برای خروج بنویس exit)")
+    print("Task Manager Agent: Type 'exit' or 'quit' to end the conversation.")
 
     while True:
         user_message = input("\nYou: ").strip()
