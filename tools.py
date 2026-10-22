@@ -323,3 +323,55 @@ delete_item_schema = {
     },
     "strict": True
 }
+
+def update_item(item_id: str, title: Optional[str] = None, status: Optional[str] = None) -> str:
+    if not os.path.exists(DB_FILE):
+        return json.dumps({"success": False, "error": "Database not found."})
+
+    with open(DB_FILE, "r", encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            return json.dumps({"success": False, "error": "Invalid database format."})
+
+    for day_entry in data:
+        for category in ["tasks", "events", "meetings"]:
+            items = day_entry.get(category, [])
+            for item in items:
+                if item.get("id") == item_id:
+                    if title is not None:
+                        item["title"] = title
+                    if status is not None:
+                        item["status"] = status
+                    with open(DB_FILE, "w", encoding="utf-8") as f:
+                        json.dump(data, f, indent=2, ensure_ascii=False)
+                    return json.dumps({"success": True, "updated_item": item}, ensure_ascii=False)
+
+    return json.dumps({"success": False, "error": "Item not found."})
+
+update_item_schema = {
+    "type": "function",
+    "name": "update_item",
+    "description": "Updates the title and/or status of a task, event, or meeting by its unique ID.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "item_id": {
+                "type": "string",
+                "description": "The unique ID of the item to update."
+            },
+            "title": {
+                "type": ["string", "null"],
+                "description": "The new title for the item. Pass null to keep the current title."
+            },
+            "status": {
+                "type": ["string", "null"],
+                "enum": ["pending", "completed", "not_completed", "cancelled", None],
+                "description": "The new status for the item. Pass null to keep the current status."
+            }
+        },
+        "required": ["item_id", "title", "status"],
+        "additionalProperties": False
+    },
+    "strict": True
+}
